@@ -14,6 +14,7 @@
       background: #020607;
     }
     #game {
+      position: relative;
       width: min(88vw, calc(100vh - 100px), 560px);
       display: grid;
       gap: 10px;
@@ -33,6 +34,75 @@
         3px 3px 0 #ff3558,
         5px 5px 0 #4f1020,
         0 0 10px #50ffe1;
+    }
+    #sound {
+      position: absolute;
+      top: -4px;
+      right: 0;
+      z-index: 3;
+    }
+    #sound-toggle {
+      width: 30px;
+      height: 26px;
+      display: grid;
+      place-items: center;
+      padding: 0;
+      border: 1px solid #0a4b49;
+      background: #020607;
+      color: #50ffe1;
+      cursor: pointer;
+    }
+    #sound-toggle:hover, #sound-toggle:focus-visible {
+      border-color: #50ffe1;
+      outline: 0;
+      box-shadow: 0 0 7px #50ffe1;
+    }
+    .speaker {
+      position: relative;
+      width: 19px;
+      height: 14px;
+    }
+    .speaker::before {
+      content: "";
+      position: absolute;
+      inset: 0 5px 0 0;
+      background: currentColor;
+      clip-path: polygon(
+        0 36%, 32% 36%, 32% 28%, 48% 28%, 48% 20%,
+        64% 20%, 64% 12%, 80% 12%, 80% 88%, 64% 88%,
+        64% 80%, 48% 80%, 48% 72%, 32% 72%, 32% 64%, 0 64%
+      );
+    }
+    .speaker::after {
+      content: "";
+      position: absolute;
+      top: 2px;
+      right: 0;
+      width: 2px;
+      height: 2px;
+      background: currentColor;
+      box-shadow:
+        2px 2px 0 currentColor, 2px 4px 0 currentColor,
+        2px 6px 0 currentColor, 0 8px 0 currentColor;
+    }
+    #sound-toggle.muted { opacity: .45 }
+    #sound-toggle.muted .speaker::after { display: none }
+    #volume-menu {
+      position: absolute;
+      top: 32px;
+      right: 0;
+      width: 132px;
+      padding: 12px;
+      border: 1px solid #0a4b49;
+      background: #020607;
+      box-shadow: 4px 4px 0 #0a2325, 0 0 10px #0a2325;
+    }
+    #volume-menu[hidden] { display: none }
+    #volume {
+      width: 100%;
+      margin: 0;
+      accent-color: #50ffe1;
+      cursor: pointer;
     }
     #hud {
       display: flex;
@@ -60,8 +130,8 @@
       gap: 2px;
       padding: 2px;
       position: relative;
-      background: #0a2325;
-      box-shadow: 0 0 0 2px #0a2325, 0 0 16px #0a2325;
+      background: #0d3032;
+      box-shadow: 0 0 0 2px #123c3e, 0 0 12px rgba(80,255,225,.14);
       image-rendering: pixelated;
     }
     .cell {
@@ -74,64 +144,207 @@
       padding: 0;
       border: 0;
       outline: 0;
-      background: #020607;
+      background: #010506;
       cursor: pointer;
     }
     .wall {
-      background: #0a2325;
-      box-shadow: inset 0 0 0 1px rgba(80, 255, 225, .28);
+      background: #061516;
+      box-shadow:
+        inset 2px 2px 0 #164143,
+        inset -2px -2px 0 #041012;
       cursor: default;
     }
-    .open { box-shadow: inset 0 0 0 1px #0a2325 }
+    .wall::before, .wall::after {
+      content: "";
+      position: absolute;
+      inset: 2px;
+      pointer-events: none;
+    }
+    .wall::before {
+      background: repeating-linear-gradient(
+        to right,
+        #123739 0 10px,
+        transparent 10px 12px,
+        #0d2c2e 12px 22px,
+        transparent 22px 24px
+      );
+      -webkit-mask: repeating-linear-gradient(
+        to bottom,
+        #000 0 7px,
+        transparent 7px 16px
+      );
+      mask: repeating-linear-gradient(
+        to bottom,
+        #000 0 7px,
+        transparent 7px 16px
+      );
+    }
+    .wall::after {
+      background: repeating-linear-gradient(
+        to right,
+        #0d2c2e 0 10px,
+        transparent 10px 12px,
+        #123739 12px 22px,
+        transparent 22px 24px
+      );
+      transform: translateX(6px);
+      -webkit-mask: repeating-linear-gradient(
+        to bottom,
+        transparent 0 8px,
+        #000 8px 15px,
+        transparent 15px 16px
+      );
+      mask: repeating-linear-gradient(
+        to bottom,
+        transparent 0 8px,
+        #000 8px 15px,
+        transparent 15px 16px
+      );
+    }
+    .open { box-shadow: inset 0 0 0 1px #0d3032 }
     .kill { box-shadow: inset 0 0 0 1px #50ffe1 }
     .danger { box-shadow: inset 0 0 0 1px #ff3558 }
     .open:hover, .kill:hover { background: #0a2325 }
     .danger:hover { background: #ff3558 }
     .cube {
-      width: 46%;
+      position: relative;
+      width: 64%;
       aspect-ratio: 1;
-      background: #50ffe1;
-      box-shadow: 0 0 7px #50ffe1;
+      image-rendering: pixelated;
+      filter: drop-shadow(0 0 2px rgba(89,255,140,.75)) drop-shadow(0 0 5px rgba(23,201,91,.55));
+    }
+    .cube i {
+      position: absolute;
+      inset: 0;
+    }
+    .cube i:nth-child(1) {
+      background: #baffcb;
+      clip-path: polygon(
+        0 24%, 8% 24%, 8% 16%, 16% 16%,
+        16% 8%, 24% 8%, 24% 0, 100% 0,
+        100% 8%, 92% 8%, 92% 16%, 84% 16%,
+        84% 24%, 76% 24%
+      );
+    }
+    .cube i:nth-child(2) {
+      background: #34e875;
+      clip-path: polygon(0 24%, 76% 24%, 76% 100%, 0 100%);
+    }
+    .cube i:nth-child(3) {
+      background: #118c4d;
+      clip-path: polygon(
+        76% 24%, 84% 24%, 84% 16%, 92% 16%,
+        92% 8%, 100% 8%, 100% 76%,
+        92% 76%, 92% 84%, 84% 84%,
+        84% 92%, 76% 92%, 76% 100%
+      );
     }
     .triangle {
+      position: relative;
       width: 64%;
       height: 64%;
-      background: linear-gradient(#ff3558 0 24%, #50ffe1 24%);
-      clip-path: polygon(
-        42% 0, 58% 0, 58% 16%, 67% 16%, 67% 33%,
-        75% 33%, 75% 50%, 83% 50%, 83% 67%, 92% 67%,
-        92% 84%, 100% 84%, 100% 100%, 0 100%, 0 84%,
-        8% 84%, 8% 67%, 17% 67%, 17% 50%, 25% 50%,
-        25% 33%, 33% 33%, 33% 16%, 42% 16%
-      );
-      filter: drop-shadow(0 -1px 3px #ff3558) drop-shadow(0 2px 2px #50ffe1);
+      image-rendering: pixelated;
+      filter: drop-shadow(0 0 1px rgba(255,53,88,.55)) drop-shadow(0 1px 1px rgba(80,255,225,.35));
     }
-    #board::after {
+    .triangle i {
+      position: absolute;
+      inset: 0;
+    }
+    .triangle i:nth-child(1) {
+      background: #55ffe1;
+      clip-path: polygon(
+        32% 0, 32% 8%, 40% 8%, 40% 24%,
+        48% 24%, 48% 48%, 56% 48%, 56% 72%,
+        64% 72%, 64% 96%, 0 96%, 0 72%,
+        8% 72%, 8% 48%, 16% 48%, 16% 24%,
+        24% 24%, 24% 8%, 32% 8%
+      );
+    }
+    .triangle i:nth-child(2) {
+      background: #126f6d;
+      clip-path: polygon(
+        32% 0, 40% 0, 40% 8%, 48% 8%,
+        48% 16%, 56% 16%, 56% 24%, 64% 24%,
+        64% 32%, 72% 32%, 72% 40%, 80% 40%,
+        80% 48%, 88% 48%, 88% 56%, 96% 56%,
+        96% 64%, 88% 64%, 88% 72%, 80% 72%,
+        80% 80%, 72% 80%, 72% 88%, 64% 88%,
+        64% 96%, 64% 72%, 56% 72%, 56% 48%,
+        48% 48%, 48% 24%, 40% 24%, 40% 8%,
+        32% 8%
+      );
+    }
+    .triangle::before, .triangle::after {
       content: "";
       position: absolute;
       inset: 0;
+      z-index: 1;
+    }
+    .triangle::before {
+      background: #ff6b82;
+      clip-path: polygon(
+        32% 0, 32% 8%, 40% 8%, 40% 24%,
+        24% 24%, 24% 8%, 32% 8%
+      );
+    }
+    .triangle::after {
+      background: #a81733;
+      clip-path: polygon(
+        32% 0, 40% 0, 40% 8%, 48% 8%,
+        48% 16%, 48% 24%, 40% 24%, 40% 8%,
+        32% 8%
+      );
+    }
+    .burst {
+      position: absolute;
+      z-index: 3;
+      width: 4px;
+      height: 4px;
       pointer-events: none;
-      transform: scaleY(0);
+      background: #fff;
+      box-shadow:
+        -7px -5px #ff3558, 7px -6px #50ffe1,
+        -9px 6px #50ffe1, 8px 7px #ff3558,
+        0 -10px #75ffe8, 10px 1px #a81733;
+      animation: disintegrate .24s steps(4) forwards;
     }
+    .burst.player {
+      background: #baffcb;
+      box-shadow:
+        -7px -5px #34e875, 7px -6px #baffcb,
+        -9px 6px #118c4d, 8px 7px #59ff8c,
+        0 -10px #34e875, 10px 1px #baffcb;
+      animation-duration: .28s;
+    }
+    .cube.popped { animation: pop .28s steps(4) forwards }
     #board.dead { animation: hit .35s steps(2) }
-    #board.clear::after {
-      background: #50ffe1;
-      animation: wipe .35s steps(6);
-    }
     @keyframes hit {
       50% { filter: invert(1) }
     }
-    @keyframes wipe {
-      0% { transform: scaleY(0); transform-origin: bottom }
-      50% { transform: scaleY(1); transform-origin: bottom }
-      51% { transform: scaleY(1); transform-origin: top }
-      100% { transform: scaleY(0); transform-origin: top }
+    @keyframes disintegrate {
+      0% { transform: scale(.6); opacity: 1 }
+      50% { transform: scale(1) }
+      100% { transform: scale(2); opacity: 0 }
+    }
+    @keyframes pop {
+      0% { transform: scale(1) }
+      25% { transform: scale(1.25); filter: brightness(2) }
+      50% { transform: scale(.8) }
+      100% { transform: scale(0); opacity: 0 }
     }
   </style>
 </head>
 <body>
   <main id="game">
     <h1>CUBE FIGHTER</h1>
+    <div id="sound">
+      <button id="sound-toggle" type="button" aria-label="Volume 100%" aria-controls="volume-menu" aria-expanded="false">
+        <span class="speaker" aria-hidden="true"></span>
+      </button>
+      <div id="volume-menu" hidden>
+        <input id="volume" type="range" min="0" max="100" value="100" aria-label="Volume">
+      </div>
+    </div>
     <div id="hud">
       <div><span>SCORE</span><output id="score">000</output></div>
       <div><span>LEVEL</span><output id="level">01</output></div>
@@ -144,44 +357,85 @@
     const score = document.querySelector("#score");
     const levelDisplay = document.querySelector("#level");
     const highScore = document.querySelector("#high-score");
+    const sound = document.querySelector("#sound");
+    const soundToggle = document.querySelector("#sound-toggle");
+    const volumeMenu = document.querySelector("#volume-menu");
+    const volumeSlider = document.querySelector("#volume");
     const dirs = [[0,-1],[1,0],[0,1],[-1,0]];
     const key = (x,y) => x + "," + y;
     const pointHit = (t,dx,dy) => dx === -dirs[t.d][0] && dy === -dirs[t.d][1];
     let level = 1, kills = 0, high = +localStorage.cubeFighterHigh || 0;
     let state, locked = false, audio;
-    function tone(from,to=from,time=.05,type="sine",volume=.02,delay=0) {
+    let volumeLevel = +(localStorage.cubeFighterVolume ?? 1);
+    if (!Number.isFinite(volumeLevel)) volumeLevel = 1;
+    volumeLevel = Math.max(0,Math.min(1,volumeLevel));
+    volumeSlider.value = volumeLevel * 100;
+    soundToggle.classList.toggle("muted",!volumeLevel);
+    soundToggle.setAttribute("aria-label",`Volume ${volumeSlider.value}%`);
+    function getAudio() {
       const AudioContext = window.AudioContext || window.webkitAudioContext;
-      if (!AudioContext) return;
-      audio ||= new AudioContext();
-      if (audio.state === "suspended") audio.resume();
-      const start = audio.currentTime + delay;
-      const oscillator = audio.createOscillator();
-      const gain = audio.createGain();
-      oscillator.type = type;
-      oscillator.frequency.setValueAtTime(from,start);
-      oscillator.frequency.exponentialRampToValueAtTime(to,start + time);
-      gain.gain.setValueAtTime(volume,start);
-      gain.gain.exponentialRampToValueAtTime(.0001,start + time);
-      oscillator.connect(gain).connect(audio.destination);
-      oscillator.start(start);
-      oscillator.stop(start + time);
+      if (AudioContext) return audio ||= new AudioContext();
+    }
+    function unlockAudio() {
+      const context = getAudio();
+      if (context?.state === "suspended") context.resume();
+    }
+    function tone(from,to=from,time=.05,type="sine",volume=.02,delay=0) {
+      if (!volumeLevel) return;
+      const context = getAudio();
+      if (!context) return;
+      const play = () => {
+        const start = context.currentTime + delay;
+        const oscillator = context.createOscillator();
+        const gain = context.createGain();
+        oscillator.type = type;
+        oscillator.frequency.setValueAtTime(from,start);
+        oscillator.frequency.exponentialRampToValueAtTime(to,start + time);
+        gain.gain.setValueAtTime(Math.min(volume * 12 * volumeLevel,.95),start);
+        gain.gain.exponentialRampToValueAtTime(.0001,start + time);
+        oscillator.connect(gain).connect(context.destination);
+        oscillator.start(start);
+        oscillator.stop(start + time);
+      };
+      if (context.state === "suspended") context.resume().then(play);
+      else play();
     }
     const fx = {
-      step: () => tone(160,120,.035),
-      wall: () => tone(75,55,.045,"triangle",.025),
-      wait: () => tone(120,90,.05,"sine",.015),
-      turn: () => tone(95,70,.03,"triangle",.009),
+      step: () => tone(280,210,.04,"sine",.045),
+      wall: () => tone(160,110,.05,"triangle",.06),
+      wait: () => tone(220,160,.055,"sine",.035),
+      turn: () => tone(190,140,.035,"triangle",.022),
       kill: () => {
-        tone(360,540,.05,"triangle",.03);
-        tone(720,900,.06,"sine",.018,.025);
+        tone(360,540,.055,"triangle",.07);
+        tone(720,900,.065,"sine",.04,.025);
       },
-      die: () => tone(150,45,.28,"triangle",.05),
+      die: () => tone(240,65,.28,"triangle",.09),
       clear: () => {
-        tone(330,330,.05,"sine",.018,.06);
-        tone(440,440,.05,"sine",.018,.12);
-        tone(660,660,.08,"triangle",.022,.18);
+        tone(330,330,.05,"sine",.04,.06);
+        tone(440,440,.05,"sine",.04,.12);
+        tone(660,660,.08,"triangle",.05,.18);
       }
     };
+    function showVolume(open) {
+      volumeMenu.hidden = !open;
+      soundToggle.setAttribute("aria-expanded",open);
+      if (open) volumeSlider.focus();
+    }
+    soundToggle.addEventListener("click",() => showVolume(volumeMenu.hidden));
+    volumeSlider.addEventListener("input",() => {
+      volumeLevel = volumeSlider.value / 100;
+      localStorage.cubeFighterVolume = volumeLevel;
+      soundToggle.classList.toggle("muted",!volumeLevel);
+      soundToggle.setAttribute("aria-label",`Volume ${volumeSlider.value}%`);
+    });
+    addEventListener("click",event => {
+      if (!sound.contains(event.target)) showVolume(false);
+    });
+    addEventListener("keydown",event => {
+      if (event.key === "Escape") showVolume(false);
+    });
+    addEventListener("pointerdown",unlockAudio,{once:true});
+    addEventListener("keydown",unlockAudio,{once:true});
     const showScores = () => {
       score.value = String(kills).padStart(3,"0");
       highScore.value = String(high).padStart(3,"0");
@@ -263,12 +517,14 @@
           } else if (state.player.x === x && state.player.y === y) {
             const cube = document.createElement("div");
             cube.className = "cube";
+            cube.innerHTML = "<i></i><i></i><i></i>";
             cell.append(cube);
           } else {
             if (t) {
               const triangle = document.createElement("div");
               triangle.className = "triangle";
-              triangle.style.transform = `rotate(${t.d * 90}deg)`;
+              triangle.innerHTML = "<i></i><i></i>";
+              triangle.style.transform = `rotate(${t.d * 90 + 13}deg)`;
               cell.append(triangle);
             }
           }
@@ -280,9 +536,22 @@
       }
     }
 
+    function burst(x,y,type) {
+      const cell = board.querySelector(`[data-x="${x}"][data-y="${y}"]`);
+      if (!cell) return;
+      const particle = document.createElement("i");
+      particle.className = `burst ${type}`;
+      particle.style.left = cell.offsetLeft + cell.offsetWidth / 2 - 2 + "px";
+      particle.style.top = cell.offsetTop + cell.offsetHeight / 2 - 2 + "px";
+      particle.addEventListener("animationend",() => particle.remove(),{once:true});
+      board.append(particle);
+    }
+
     function lose() {
       locked = true;
       board.classList.add("dead");
+      board.querySelector(".cube")?.classList.add("popped");
+      burst(state.player.x,state.player.y,"player");
       fx.die();
       setTimeout(() => {
         level = 1;
@@ -294,7 +563,6 @@
 
     function win() {
       locked = true;
-      board.classList.add("clear");
       fx.clear();
       setTimeout(() => { level++; start(); }, 350);
     }
@@ -340,6 +608,7 @@
       if (locked) return;
       const [dx,dy] = dirs[d];
       const x = state.player.x + dx, y = state.player.y + dy;
+      let destroyed = false;
       if (state.walls.has(key(x,y))) {
         fx.wall();
         return;
@@ -350,6 +619,7 @@
         const t = state.triangles[i];
         if (pointHit(t,dx,dy)) return lose();
         state.triangles.splice(i,1);
+        destroyed = true;
         fx.kill();
         kills++;
         if (kills > high) {
@@ -361,9 +631,10 @@
 
       state.player = {x,y};
       draw();
+      if (destroyed) burst(x,y,"enemy");
       if (!state.triangles.length) return win();
       locked = true;
-      setTimeout(enemies, 100);
+      setTimeout(enemies, destroyed ? 260 : 100);
     }
 
     board.addEventListener("click", event => {
@@ -376,6 +647,7 @@
     });
 
     addEventListener("keydown", event => {
+      if (event.target === volumeSlider) return;
       const keys = {ArrowUp:0,w:0,ArrowRight:1,d:1,ArrowDown:2,s:2,ArrowLeft:3,a:3};
       const d = keys[event.key];
       if (d !== undefined) {
