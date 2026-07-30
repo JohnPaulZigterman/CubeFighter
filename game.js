@@ -196,7 +196,7 @@ function enemyTurn() {
   for (const pyramid of state.pyramids) {
     const here = pyramid.y * n + pyramid.x;
     occupied.delete(here);
-    let next, best = Infinity;
+    let choices = [];
 
     for (let d = 0; d < 4; d++) {
       const [dx,dy] = DIRS[d];
@@ -205,12 +205,20 @@ function enemyTurn() {
       const tile = y * n + x;
       if (routes[tile] < 0 || routes[tile] >= routes[here]) continue;
       const turn = Math.min((d-pyramid.d+4)%4,(pyramid.d-d+4)%4);
-      const score = routes[tile] * 3 + turn;
-      if (score < best || score === best && Math.random() < .5) {
-        best = score;
-        next = {d,x,y,tile};
-      }
+      choices.push({d,x,y,tile,turn});
     }
+
+    if (choices.length > 1) {
+      const open = choices.filter(choice => !occupied.has(choice.tile));
+      if (open.length) choices = open;
+    }
+
+    let next, best = Infinity;
+    for (const choice of choices)
+      if (choice.turn < best || choice.turn === best && Math.random() < .5) {
+        best = choice.turn;
+        next = choice;
+      }
 
     if (!next) {
       occupied.add(here);
