@@ -101,15 +101,16 @@ h1 {
 #hud span { opacity: .55 }
 #board {
   --n: 10;
+  --line: 1px;
   width: 100%;
   aspect-ratio: 1;
   display: grid;
   grid-template: repeat(var(--n), 1fr) / repeat(var(--n), 1fr);
-  gap: 2px;
-  padding: 2px;
+  gap: var(--line);
+  padding: var(--line);
   position: relative;
   background: #0d3032;
-  box-shadow: 0 0 0 2px #123c3e, 0 0 12px rgba(80,255,225,.14);
+  box-shadow: 0 0 0 var(--line) #123c3e, 0 0 12px rgba(80,255,225,.14);
 }
 .cell {
   position: relative;

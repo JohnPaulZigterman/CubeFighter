@@ -1,5 +1,6 @@
 import {fx} from "./audio.js";
 
+const game = document.querySelector("#game");
 const board = document.querySelector("#board");
 const score = document.querySelector("#score");
 const levelDisplay = document.querySelector("#level");
@@ -14,7 +15,7 @@ const pointHit = (p,dx,dy) => dx === -DIRS[p.d][0] && dy === -DIRS[p.d][1];
 let level = 1;
 let kills = 0;
 let high = Number(localStorage.cubeFighterHigh) || 0;
-let state, cells, locked = false;
+let state, cells, fitFrame, locked = false;
 
 function showScores() {
   score.value = String(kills).padStart(3,"0");
@@ -55,6 +56,24 @@ function buildBoard(n) {
     }
   }
   board.replaceChildren(fragment);
+  fitBoard(n);
+}
+
+function fitBoard(n = state.n) {
+  const ratio = devicePixelRatio || 1;
+  const line = Math.max(1,Math.round(ratio));
+  const limit = Math.min(innerWidth * .88,innerHeight - 100,560) * ratio;
+  const cell = Math.max(1,Math.floor((limit - (n + 1) * line) / n));
+  game.style.width = (n * cell + (n + 1) * line) / ratio + "px";
+  board.style.setProperty("--line",line / ratio + "px");
+  board.style.transform = "";
+  cancelAnimationFrame(fitFrame);
+  fitFrame = requestAnimationFrame(() => {
+    const rect = board.getBoundingClientRect();
+    const x = (Math.round(rect.left * ratio) - rect.left * ratio) / ratio;
+    const y = (Math.round(rect.top * ratio) - rect.top * ratio) / ratio;
+    board.style.transform = `translate(${x}px,${y}px)`;
+  });
 }
 
 function render() {
@@ -309,6 +328,7 @@ addEventListener("keydown",event => {
     setTimeout(enemyTurn,100);
   }
 });
+addEventListener("resize",() => fitBoard());
 
 showScores();
 start();
