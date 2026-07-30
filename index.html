@@ -14,14 +14,27 @@
       background: #020607;
     }
     #game {
-      position: relative;
-      width: min(88vmin, 560px);
+      width: min(88vw, calc(100vh - 100px), 560px);
+      display: grid;
+      gap: 10px;
+    }
+    h1 {
+      justify-self: center;
+      width: max-content;
+      margin: 0 0 6px;
+      color: #50ffe1;
+      font: 900 clamp(28px, 7vmin, 46px)/.8 "Arial Black", Impact, sans-serif;
+      letter-spacing: .08em;
+      -webkit-text-stroke: 1px #020607;
+      text-shadow:
+        -1px -1px 0 #bafff4,
+        1px 1px 0 #148577,
+        2px 2px 0 #0a4b49,
+        3px 3px 0 #ff3558,
+        5px 5px 0 #4f1020,
+        0 0 10px #50ffe1;
     }
     #hud {
-      position: absolute;
-      left: 0;
-      right: 0;
-      top: -22px;
       display: flex;
       justify-content: space-between;
       font: 600 10px Arial, sans-serif;
@@ -118,6 +131,7 @@
 </head>
 <body>
   <main id="game">
+    <h1>CUBE FIGHTER</h1>
     <div id="hud">
       <div><span>SCORE</span><output id="score">000</output></div>
       <div><span>LEVEL</span><output id="level">01</output></div>
